@@ -13,9 +13,11 @@
 //sleep
 #include <unistd.h>
 
+#include "utils.hpp"
 using namespace std;
 using namespace Eigen;
-
+#define TRACING 0
+#define CGROUP  0
 typedef pair<vector<uint8_t>, vector<MatrixXn>> MnistSet;
 
 static_assert(sizeof(char) == 1, "char size isn't 1 byte");
@@ -131,9 +133,21 @@ int mnist(int argc, char **argv) {
     cout<<"need data dir as an argument"<<endl;
     return 1;
   }
+
+  if (argc < 4) {
+      std::cout << "Invocation: ./cppnn <mnistdir> <seed> <trace>" << std::endl;
+      exit(-1);
+  }
+  
+  char* filename = argv[3];
+  srand((unsigned int) 48);
+
+
+
+
   enum IFILE { TRNLBL, TRNDAT, TSTLBL, TSTDAT };
-  string files[] = {"train-labels.idx1-ubyte", "train-images.idx3-ubyte",
-    "t10k-labels.idx1-ubyte", "t10k-images.idx3-ubyte"};
+  string files[] = {"train-labels-idx1-ubyte", "train-images-idx3-ubyte",
+    "t10k-labels-idx1-ubyte", "t10k-images-idx3-ubyte"};
   istream *ifs[4];
   vector<uint32_t> dims[4];
   cout<<"reading headers..."<<endl;
@@ -154,22 +168,57 @@ int mnist(int argc, char **argv) {
     cout<<"this is a "<<(int)traindat.first[i]<<endl;
     usleep(1000000);
   }*/
+
+#if TRACING
+  pf_initialize_data_structures();
+  tag_process();
+  std::cout << "process tagged" << std::endl;
+#endif
+
+
+#if CGROUP
+  std::cout << "making cgroups" << std::endl;
+  set_cgroup_pid("/cgroup2/prefetch_ctrl/cgroup.procs");
+  // num_pages * PAGE_SIZE    512983*4096
+  set_cgroup_limit("/cgroup2/prefetch_ctrl/memory.high", 100, 512983 * 4096);
+  sleep(5);
+
+#endif
+  {
   vector<MLP::sample> trainset = convert(traindat);
   vector<MLP::sample> testset = convert(testdat);
-  ArrayXi layers(3);
-  layers << 28*28, 6*6, 10;
+  vector<MLP::sample> myset(&testset[0], &testset[1]);
+
+  std::cout << "trainset size:" << trainset.size() << " testset size: " << testset.size()<< "myset:" << myset.size() << std::endl;
+
+  ArrayXi layers(4);
+  layers << 28*28,500*500,6*6,  10;
   cout<<"initializing net..."<<endl;
+
   MLP net(layers, 0.5);
   const int ITERS = 50;
   const size_t BATCH = 700;
   cout<<"training for "<<ITERS<<" iterations... minibatch size "<<BATCH<<endl;
-  for(int i=0; i<ITERS; i++) {
+
+#if TRACING
+reset_trace();
+#endif
+  
+  /*
+  for(int i=2; i<ITERS; i++) {
     if(i%10==0) test(net, testset, "test");
     cout<<"iteration "<<i<<endl;
     net.rprop(trainset, 0.1, 1.2, 0.5, BATCH);
   }
-  test(net, trainset, "train");
-  test(net, testset, "test");
+  */
+   test(net, myset, "mytest");
+  }
+#if TRACING
+  set_present_bits();
+  untag_process(); 
+  print_trace(filename,0);
+  pf_teardown_data_structures();
+#endif
   
   for(size_t i=0; i<4; i++) delete ifs[i];
   return 0;

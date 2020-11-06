@@ -4,7 +4,9 @@ EIGEN_DIR=$(realpath ../../eigen)
 PTEEDITOR_DIR=$(realpath ../../PTEditor)
 PTEEDITOR_OBJ=$(PTEEDITOR_DIR)/ptedit.o
 UTILS_DIR = $(realpath ../)
-CXXFLAGS=$(OPT) -c -g -O2 -Wall -std=c++11 -I $(EIGEN_DIR) -I $(PTEEDITOR_DIR) -I $(UTILS_DIR)
+BOOST_DIR=/opt/boost_1_73_0
+SRC_DIR = $(realpath ./src)
+CXXFLAGS=$(OPT) -c -g -O2 -Wall -std=c++11 -I $(EIGEN_DIR) -I $(PTEEDITOR_DIR) -I $(UTILS_DIR) -I $(BOOST_DIR) -I $(SRC_DIR)
 LDFLAGS=
 
 
