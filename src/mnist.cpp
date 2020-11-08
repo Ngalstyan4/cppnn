@@ -150,7 +150,7 @@ int mnist(int argc, char **argv) {
     "t10k-labels-idx1-ubyte", "t10k-images-idx3-ubyte"};
   istream *ifs[4];
   vector<uint32_t> dims[4];
-  cout<<"reading headers..."<<endl;
+  // cout<<"reading headers..."<<endl;
   for(size_t i=0; i<4; i++) {
     files[i] = argv[1]+("/"+files[i]);
     ifs[i] = new ifstream(files[i], ios::binary);
@@ -185,11 +185,11 @@ int mnist(int argc, char **argv) {
 
 #endif
   {
-  vector<MLP::sample> trainset = convert(traindat);
-  vector<MLP::sample> testset = convert(testdat);
-  vector<MLP::sample> myset(&testset[0], &testset[1]);
+  // vector<MLP::sample> trainset = convert(traindat);
+  // vector<MLP::sample> testset = convert(testdat);
+  vector<MLP::sample> myset; //(&testset[0], &testset[1]);
 
-  std::cout << "trainset size:" << trainset.size() << " testset size: " << testset.size()<< "myset:" << myset.size() << std::endl;
+  // std::cout << "trainset size:" << trainset.size() << " testset size: " << testset.size()<< "myset:" << myset.size() << std::endl;
 
   ArrayXi layers(4);
   layers << 28*28,500*500,6*6,  10;
