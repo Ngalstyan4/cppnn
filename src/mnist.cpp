@@ -185,14 +185,14 @@ int mnist(int argc, char **argv) {
 
 #endif
   {
-  // vector<MLP::sample> trainset = convert(traindat);
-  // vector<MLP::sample> testset = convert(testdat);
-  vector<MLP::sample> myset; //(&testset[0], &testset[1]);
+  vector<MLP::sample> trainset = convert(traindat);
+  vector<MLP::sample> testset = convert(testdat);
+  vector<MLP::sample> myset(&testset[0], &testset[1]);
 
   // std::cout << "trainset size:" << trainset.size() << " testset size: " << testset.size()<< "myset:" << myset.size() << std::endl;
 
   ArrayXi layers(4);
-  layers << 28*28,500*500,6*6,  10;
+  layers << 28*28,500*500,98*98,  10;
   cout<<"initializing net..."<<endl;
 
   MLP net(layers, 0.5);
@@ -200,9 +200,6 @@ int mnist(int argc, char **argv) {
   const size_t BATCH = 700;
   cout<<"training for "<<ITERS<<" iterations... minibatch size "<<BATCH<<endl;
 
-#if TRACING
-reset_trace();
-#endif
   
   /*
   for(int i=2; i<ITERS; i++) {
