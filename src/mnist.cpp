@@ -192,7 +192,7 @@ int mnist(int argc, char **argv) {
   // std::cout << "trainset size:" << trainset.size() << " testset size: " << testset.size()<< "myset:" << myset.size() << std::endl;
 
   ArrayXi layers(4);
-  layers << 28*28,500*500,30*30,  10;
+  layers << 28*28,500*500,80*80,  10;
   cout<<"initializing net..."<<endl;
 
   MLP net(layers, 0.5);
